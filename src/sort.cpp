@@ -68,7 +68,7 @@ int selectSort (int *arr, int arr_size)
 	return RST_SUCCESS;
 }
 
-
+/*
 int bubbleSort(int *arr, int arr_size)
 {
 	print_log(CODE_LOG_NORMAL, "call bubbleSort function... \n");
@@ -98,7 +98,7 @@ int bubbleSort(int *arr, int arr_size)
 	}
 	print_log(CODE_LOG_NORMAL, "END selectSort function... \n");
 	return RST_SUCCESS;
-}
+}*/
 
 int partition(int *arr, int low, int high)
 {

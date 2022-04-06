@@ -33,5 +33,11 @@ float avg(int count, ...)
 
 int main ()
 {
+	int arr[] = {5,6,1,4,3};
+	int len_arr = sizeof(arr)/sizeof(int);
+
+	// bubble sort
+	bubbleSort(arr, len_arr);
+	printArr(arr, len_arr);
 	return RST_SUCCESS;
 }

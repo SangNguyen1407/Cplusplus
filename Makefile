@@ -1,5 +1,5 @@
 CC = g++
-CFLAG = -coverage -pthread -Wwrite-strings
+#CFLAG = -coverage -pthread -Wwrite-strings
 CFLAG += -Wall -g
 
 TARGET_DIR = $(CURDIR)
@@ -16,6 +16,7 @@ PROJ_SRC  = $(TARGET_SRC)/main.cpp
 PROJ_SRC += $(TARGET_SRC)/linkedList.cpp
 PROJ_SRC += $(TARGET_SRC)/printLog.cpp
 PROJ_SRC += $(TARGET_SRC)/sort.cpp
+PROJ_SRC += $(TARGET_SRC)/bubble_sort.cpp
 PROJ_SRC += $(TARGET_SRC)/fileHandler.cpp
 
 PROJ_OBJ = main.o
