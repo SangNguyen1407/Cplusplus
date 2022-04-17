@@ -123,7 +123,6 @@ int recv_echo_reply(int sock, int ident)
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             return 0;
         }
-
         return -1;
     }
 
