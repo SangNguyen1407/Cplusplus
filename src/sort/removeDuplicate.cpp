@@ -108,9 +108,36 @@ int insertNode(ListNode *lNode, int pos, int num){
     return 1;
 }
 
+bool isPalindrome(ListNode* head) {
+    if (head == NULL || head->next == NULL){
+        return true;
+    }
+
+    ListNode* temp = head;
+    ListNode* reverse = new ListNode(temp->val);
+
+    while (temp != NULL){
+        ListNode* reverse_next = new ListNode(temp->val);
+        reverse_next->next = reverse;
+        reverse = reverse_next;
+        temp = temp-> next;
+    }
+
+    while(head != NULL && reverse != NULL){
+        if (head->val != reverse->val){
+            return false;
+        }
+        head = head->next;
+        reverse = reverse->next;
+    }
+
+    return true;
+}
+
+
 int main ()
 {
-    int arr[] = {1, 1, 1, 2, 2, 2, 6, 9, 9, 9};
+    int arr[] = {1, 2, 3, 4, 3, 2, 1};
     ListNode *node;
 
     int len = sizeof(arr)/sizeof(arr[0]); 
@@ -119,9 +146,9 @@ int main ()
     printListNode(node);
     cout << endl;
     //insertNode(node, 3, 5);
-    deleteDuplicates(node);
-    printListNode(node);
-
+ //   deleteDuplicates(node);
+ //   printListNode(node);
+    cout << isPalindrome(node) << endl;
 
     return 0;    
 }
