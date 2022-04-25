@@ -5,12 +5,16 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 
 #define RECV_TIMEOUT_USEC 100000
 #define MAGIC "1234567890"
 #define MAGIC_LEN 11
 #define MTU 1500
+#define NI_MAXHOST 1025
 
 struct icmp_echo{
     // header
@@ -24,6 +28,15 @@ struct icmp_echo{
     double sending_ts;
     char magic[MAGIC_LEN];
 };
+
+char url[NI_MAXHOST];
+
+double get_timestamp()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec + ((double)tv.tv_usec) / 1000000;
+}
 
 uint16_t calculate_checksum(unsigned char* buffer, int bytes){
     uint32_t checksum = 0;
@@ -57,6 +70,7 @@ uint16_t calculate_checksum(unsigned char* buffer, int bytes){
 
 int send_echo_request(int sock, struct sockaddr_in* addr, int ident, int seq){
     struct icmp_echo icmp;
+    char buffer[NI_MAXHOST];
 
     // fill header file
     icmp.type = 8;
@@ -64,7 +78,9 @@ int send_echo_request(int sock, struct sockaddr_in* addr, int ident, int seq){
     icmp.ident = htons(ident);
     icmp.seq = htons(seq);
     strncpy(icmp.magic, MAGIC, MAGIC_LEN);
+    icmp.sending_ts = get_timestamp();
     icmp.checksum = htons(calculate_checksum((unsigned char*)&icmp, sizeof(icmp)));
+
     // send it
     int bytes = sendto(sock, &icmp, sizeof(icmp), 0, (struct sockaddr*)addr, sizeof(*addr));
     if (bytes == -1){
@@ -84,7 +100,6 @@ int recv_echo_request(int sock, int ident){
                         (struct sockaddr*)&peer_addr, &addr_len);
     
     if(bytes == -1){
-        printf("test\n");
         if(errno == EAGAIN || errno == EWOULDBLOCK){
             return 0;
         }
@@ -93,7 +108,6 @@ int recv_echo_request(int sock, int ident){
     //print info
     // find icmp packet in ip packet
     struct icmp_echo* icmp = (struct icmp_echo*)(buffer + 20);
-
     // check type
     if (icmp->type != 0 || icmp->code != 0) {
         return 0;
@@ -103,9 +117,12 @@ int recv_echo_request(int sock, int ident){
     if (ntohs(icmp->ident) != ident) {
         return 0;
     }
-    printf("%s seq=%d \n",
+
+    printf("%s (%s) seq=%d  %0.2fms\n",
         inet_ntoa(peer_addr.sin_addr),
-        ntohs(icmp->seq)
+        url,
+        ntohs(icmp->seq),
+        (get_timestamp() - icmp->sending_ts) * 1000
     );
 
     return 0;
@@ -118,6 +135,7 @@ int ping (const char* ip)
     bzero(&addr, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = 0;
+
     if (inet_aton(ip, (struct in_addr*)&addr.sin_addr.s_addr) == 0){
         return -1;
     }
@@ -134,11 +152,18 @@ int ping (const char* ip)
     if (ret == -1){
         return -1;
     }
+
+    // change ip to 
+    int err=getnameinfo((struct sockaddr *)&addr, sizeof (struct sockaddr), url, sizeof(url),0,0,0);
+    if (err!=0){
+        return -1;
+    }
+    
     //Send packet - Receive packet
     int ident = getpid();
     int seq = 1;
 
-    while(true){
+    while(seq <5){
         ret = send_echo_request(sock, &addr, ident, seq);
         if (ret == -1){
             perror("Send failed");
@@ -148,6 +173,7 @@ int ping (const char* ip)
         if (ret == -1){
             perror("Receive failed");
         }
+        seq++;
     }
     return 0;
 }
