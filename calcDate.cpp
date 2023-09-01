@@ -10,7 +10,7 @@ char *inputDate (char *inputDate){
 
     return date;
 }
-
+/*get string date to year, month, day*/
 char **anlyDateInStr(char *date){
     int i = 0;
     char** arrDate = (char**) malloc(sizeof (char *) * MAX_SIZE);
@@ -24,6 +24,7 @@ char **anlyDateInStr(char *date){
     return arrDate;
 }
 
+/*handle next date*/
 char *getNextDate(char *cYear, char *cMonth, char *cDay){
     char *cNextDate = (char *)malloc(sizeof (char *) * MAX_SIZE);
     
